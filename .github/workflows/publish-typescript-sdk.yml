@@ -1,0 +1,121 @@
+name: Publish TypeScript SDK to GitHub Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./typescript_sdk
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@rileyseaburg'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: typescript_sdk/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('typescript_sdk/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Get package version
+        id: package-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Bump version (if manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          echo "new-version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+        id: bump-version
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get final version for release
+        if: github.event_name == 'workflow_dispatch'
+        id: final-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release (if manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: typescript-sdk-v${{ steps.final-version.outputs.version }}
+          release_name: TypeScript SDK v${{ steps.final-version.outputs.version }}
+          body: |
+            ## 🚀 TikTok Business API TypeScript SDK Release
+            
+            ### Installation
+            
+            ```bash
+            npm install @rileyseaburg/tiktok-business-api-sdk
+            ```
+            
+            ### Quick Start
+            
+            ```typescript
+            import { createTikTokBusinessApiClient } from '@rileyseaburg/tiktok-business-api-sdk'
+            
+            const client = createTikTokBusinessApiClient({
+              accessToken: 'your_access_token'
+            })
+            
+            const advertisers = await client.advertiser.info({
+              advertiser_ids: ['your_advertiser_id']
+            })
+            ```
+            
+            ### Documentation
+            
+            - [README](https://github.com/rileyseaburg/tiktok-business-api-sdk/blob/main/typescript_sdk/README.md)
+            - [Examples](https://github.com/rileyseaburg/tiktok-business-api-sdk/tree/main/typescript_sdk/examples)
+            - [Changelog](https://github.com/rileyseaburg/tiktok-business-api-sdk/blob/main/typescript_sdk/CHANGELOG.md)
+          draft: false
+          prerelease: false

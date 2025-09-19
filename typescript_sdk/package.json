@@ -1,0 +1,74 @@
+{
+  "name": "@rileyseaburg/tiktok-business-api-sdk",
+  "version": "2.0.0",
+  "description": "Modern TypeScript SDK for TikTok Business API built with ORPC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "generate": "orpc generate",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run clean && npm run build && npm run type-check && npm run lint",
+    "release": "npm version patch && npm publish",
+    "release:minor": "npm version minor && npm publish",
+    "release:major": "npm version major && npm publish"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "keywords": [
+    "tiktok",
+    "business-api",
+    "typescript",
+    "sdk",
+    "orpc",
+    "type-safe"
+  ],
+  "author": "TikTok Business API Team",
+  "license": "MIT",
+  "dependencies": {
+    "@orpc/client": "^0.0.1-alpha.45",
+    "@orpc/contract": "^0.0.1-alpha.45",
+    "@orpc/server": "^0.0.1-alpha.45",
+    "@orpc/zod": "^0.0.1-alpha.45",
+    "zod": "^3.23.8",
+    "fetch-retry": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@typescript-eslint/eslint-plugin": "^7.15.0",
+    "@typescript-eslint/parser": "^7.15.0",
+    "eslint": "^8.57.0",
+    "rimraf": "^5.0.7",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.3",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rileyseaburg/tiktok-business-api-sdk.git",
+    "directory": "typescript_sdk"
+  }
+}
