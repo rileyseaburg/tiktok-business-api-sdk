@@ -40,10 +40,10 @@
   "author": "TikTok Business API Team",
   "license": "MIT",
   "dependencies": {
-    "@orpc/client": "^0.0.1-alpha.45",
-    "@orpc/contract": "^0.0.1-alpha.45",
-    "@orpc/server": "^0.0.1-alpha.45",
-    "@orpc/zod": "^0.0.1-alpha.45",
+    "@orpc/client": "^1.8.9",
+    "@orpc/contract": "^1.8.9",
+    "@orpc/server": "^1.8.9",
+    "@orpc/zod": "^1.8.9",
     "zod": "^3.23.8",
     "fetch-retry": "^6.0.0"
   },
