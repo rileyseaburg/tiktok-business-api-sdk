@@ -1,51 +1,49 @@
-import { defineConfig } from '@orpc/openapi'
-
 // New types
 interface Parameter {
-	name: string
-	// allow additional properties from OpenAPI parameter objects
-	[key: string]: any
+  name: string
+  // allow additional properties from OpenAPI parameter objects
+  [key: string]: any
 }
 
 interface Operation {
-	parameters?: Parameter[]
-	// allow additional operation properties
-	[key: string]: any
+  parameters?: Parameter[]
+  // allow additional operation properties
+  [key: string]: any
 }
 
 interface ClientConfig {
-	format: string
-	target: string
+  format: string
+  target: string
 }
 
 interface SchemasConfig {
-	dateType: string
-	unknownType: string
+  dateType: string
+  unknownType: string
 }
 
 interface NamingConfig {
-	types: string
-	functions: string
-	properties: string
+  types: string
+  functions: string
+  properties: string
 }
 
 interface Plugin {
-	name: string
-	transformOperation?: (operation: Operation) => Operation
+  name: string
+  transformOperation?: (operation: Operation) => Operation
 }
 
 interface OrpcConfig {
-	input: string
-	output: string
-	client: ClientConfig
-	server: boolean
-	zod: boolean
-	schemas: SchemasConfig
-	naming: NamingConfig
-	plugins: Plugin[]
+  input: string
+  output: string
+  client: ClientConfig
+  server: boolean
+  zod: boolean
+  schemas: SchemasConfig
+  naming: NamingConfig
+  plugins: Plugin[]
 }
 
-export default defineConfig<OrpcConfig>({
+export default ({
   input: '../yml_files/*.yml',
   output: './src/generated',
   client: {
@@ -78,4 +76,4 @@ export default defineConfig<OrpcConfig>({
       }
     }
   ]
-})
+} as OrpcConfig)
