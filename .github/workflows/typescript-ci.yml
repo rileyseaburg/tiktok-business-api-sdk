@@ -33,9 +33,26 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: typescript_sdk/package-lock.json
+        continue-on-error: true  # Allow cache to fail if package-lock.json doesn't exist
+
+      - name: Bootstrap project (if needed)
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "🚀 Running bootstrap script to set up dependencies..."
+            node bootstrap.js
+          else
+            echo "📦 Project already bootstrapped, using existing package-lock.json..."
+          fi
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "📦 package-lock.json not found, running npm install to generate it..."
+            npm install
+          else
+            echo "📦 Using existing package-lock.json with npm ci..."
+            npm ci
+          fi
 
       - name: Run type check
         run: npm run type-check
@@ -71,9 +88,17 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: typescript_sdk/package-lock.json
+        continue-on-error: true  # Allow cache to fail if package-lock.json doesn't exist
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "📦 package-lock.json not found, running npm install to generate it..."
+            npm install
+          else
+            echo "📦 Using existing package-lock.json with npm ci..."
+            npm ci
+          fi
 
       - name: Run test coverage
         run: npm run test:coverage

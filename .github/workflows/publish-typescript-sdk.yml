@@ -44,9 +44,17 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('typescript_sdk/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+        continue-on-error: true
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ ! -f package-lock.json ]; then
+            echo "📦 package-lock.json not found, running npm install to generate it..."
+            npm install
+          else
+            echo "📦 Using existing package-lock.json with npm ci..."
+            npm ci
+          fi
 
       - name: Run type check
         run: npm run type-check
