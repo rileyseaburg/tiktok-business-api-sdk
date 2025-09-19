@@ -10,7 +10,10 @@ Our SDK, launching in phases, includes APIs for Authentication, Campaign Creatio
 For details, please refer to [this page](https://ads.tiktok.com/marketing_api/docs?id=1764231376750658&rid=542rk6sm9jl).
 
 ## Quick Start
-Java, Python and Javascript are among the most popular languages for TikTok business third-party developers. The TikTok Business API SDK is a code package that provides an interface between your application and Tiktok's business APIs for these three languages. This tutorial provides the basic knowledge needed to access to our SDK and includes sample code for your reference.
+Java, Python, JavaScript, and TypeScript are among the most popular languages for TikTok business third-party developers. The TikTok Business API SDK is a code package that provides an interface between your application and Tiktok's business APIs for these languages. This tutorial provides the basic knowledge needed to access to our SDK and includes sample code for your reference.
+
+### 🚀 **New TypeScript SDK Available!**
+We now offer a modern, type-safe TypeScript SDK built with ORPC for the best developer experience. [Jump to TypeScript SDK](#integration-with-typescript-sdk)
 
 ## Version
 
@@ -500,6 +503,182 @@ Option 2
 
    ```
    
+## Integration with TypeScript SDK (Recommended)
+
+#### Features
+
+- 🚀 **Type-safe**: Full TypeScript support with auto-completion and compile-time error checking
+- 🔒 **Built-in Authentication**: Automatic access token handling and refresh
+- 🔄 **Auto-retry**: Configurable retry logic with exponential backoff for failed requests
+- 📊 **Comprehensive Coverage**: Support for all major TikTok Business API endpoints
+- 🛡️ **Enhanced Error Handling**: Detailed error information with request IDs and structured error responses
+- 🎯 **Modern Architecture**: Built with ORPC for excellent developer experience
+- 📦 **Tree-shakable**: Only import what you need for optimal bundle size
+- ⚡ **Performance**: Native fetch-based client with timeout support
+
+#### Version requirements
+
+- Node.js 18+
+- TypeScript 5.0+ (optional but recommended)
+- npm/yarn/pnpm
+
+#### Installation Steps:
+
+**Install via GitHub Packages:**
+```bash
+npm install @rileyseaburg/tiktok-business-api-sdk
+# or
+yarn add @rileyseaburg/tiktok-business-api-sdk
+# or
+pnpm add @rileyseaburg/tiktok-business-api-sdk
+```
+
+**Basic Usage:**
+```typescript
+import { createTikTokBusinessApiClient } from '@rileyseaburg/tiktok-business-api-sdk'
+
+// Create client with your access token
+const client = createTikTokBusinessApiClient({
+  accessToken: 'your_access_token_here'
+})
+
+// Get advertiser information - fully type-safe!
+const advertiserInfo = await client.advertiser.info({
+  advertiser_ids: ['your_advertiser_id']
+})
+
+console.log(advertiserInfo.data?.list?.[0]?.advertiser_name)
+```
+
+**Advanced Configuration:**
+```typescript
+const client = createTikTokBusinessApiClient({
+  accessToken: 'your_access_token',
+  timeout: 30000,          // 30 second timeout
+  retry: {
+    attempts: 3,           // Retry failed requests 3 times
+    delay: 1000           // Start with 1 second delay
+  },
+  headers: {
+    'Custom-Header': 'value'
+  }
+})
+```
+
+**Complete Example - Campaign Creation:**
+```typescript
+import { createTikTokBusinessApiClient, TikTokBusinessApiError } from '@rileyseaburg/tiktok-business-api-sdk'
+
+async function createCampaignExample() {
+  const client = createTikTokBusinessApiClient({
+    accessToken: process.env.TIKTOK_ACCESS_TOKEN!
+  })
+
+  try {
+    // Create a new campaign
+    const campaign = await client.campaign.create({
+      advertiser_id: 'your_advertiser_id',
+      campaign_name: 'TypeScript SDK Campaign',
+      objective_type: 'CONVERSIONS',
+      budget: 100.0,
+      budget_mode: 'BUDGET_MODE_DAY'
+    })
+
+    console.log('Campaign created:', campaign.data?.campaign_id)
+
+    // Create an ad group
+    const adGroup = await client.adgroup.create({
+      advertiser_id: 'your_advertiser_id',
+      campaign_id: campaign.data!.campaign_id,
+      adgroup_name: 'TypeScript SDK Ad Group',
+      placement_type: 'PLACEMENT_TYPE_AUTOMATIC',
+      bid_type: 'BID_TYPE_LOWEST_COST',
+      budget: 50.0
+    })
+
+    console.log('Ad group created:', adGroup.data?.adgroup_id)
+
+  } catch (error) {
+    if (error instanceof TikTokBusinessApiError) {
+      console.error('API Error:', {
+        code: error.code,
+        message: error.message,
+        requestId: error.requestId
+      })
+    } else {
+      console.error('Unexpected error:', error)
+    }
+  }
+}
+```
+
+**App Management Example:**
+```typescript
+// Create an app for tracking
+const newApp = await client.app.create({
+  advertiser_id: 'your_advertiser_id',
+  download_url: 'https://apps.apple.com/app/yourapp/id123456789',
+  partner: 'AppsFlyer',
+  enable_retargeting: 'RETARGETING',
+  tracking_url: {
+    click_url: 'https://yoursite.com/click',
+    impression_url: 'https://yoursite.com/impression'
+  }
+})
+
+// List all apps with pagination
+const apps = await client.app.list({
+  advertiser_id: 'your_advertiser_id',
+  page: 1,
+  page_size: 20
+})
+```
+
+**Pixel Management Example:**
+```typescript
+// Create a tracking pixel
+const pixel = await client.pixel.create({
+  advertiser_id: 'your_advertiser_id',
+  pixel_name: 'Website Conversion Pixel',
+  pixel_category: 'ONLINE_STORE'
+})
+
+console.log('Pixel Code:', pixel.data?.pixel_code)
+
+// Update pixel with advanced matching
+await client.pixel.update({
+  advertiser_id: 'your_advertiser_id',
+  pixel_id: pixel.data!.pixel_id,
+  advanced_matching_fields: ['email', 'phone_number']
+})
+```
+
+**Error Handling:**
+```typescript
+import { TikTokBusinessApiError } from '@rileyseaburg/tiktok-business-api-sdk'
+
+try {
+  const result = await client.advertiser.info({
+    advertiser_ids: ['invalid_id']
+  })
+} catch (error) {
+  if (error instanceof TikTokBusinessApiError) {
+    console.error('TikTok API Error:', {
+      code: error.code,
+      message: error.message,
+      requestId: error.requestId
+    })
+  } else {
+    console.error('Network or other error:', error)
+  }
+}
+```
+
+**For complete documentation and examples, visit:**
+- [TypeScript SDK README](typescript_sdk/README.md)
+- [Examples Directory](typescript_sdk/examples/)
+- [API Reference](typescript_sdk/docs/)
+   
 ## Give feedback
 
 - If you want to report bugs or issues, please visit [TikTok API for Business Developer Portal](https://ads.tiktok.com/marketing_api/homepage) and click "?"  on the top 
@@ -509,6 +688,7 @@ right to submit a ticket under Marketing API category.
 
 Here are the detailed documentation for currently supported programming languages.
 
+- **TypeScript (Recommended)**: please refer to [typescript_sdk/README.md](https://github.com/rileyseaburg/tiktok-business-api-sdk/blob/main/typescript_sdk/README.md)
 - Java:  please refer to [java_sdk/README.md](https://github.com/tiktok/tiktok-business-api-sdk/blob/main/java_sdk/README.md)
 - Python:  please refer to [python_sdk/README.md](https://github.com/tiktok/tiktok-business-api-sdk/blob/main/python_sdk/README.md)
 - JavaScript:  please refer [js_sdk/README.md](https://github.com/tiktok/tiktok-business-api-sdk/blob/main/js_sdk/README.md)

@@ -1,0 +1,86 @@
+name: TypeScript SDK CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'typescript_sdk/**'
+      - '.github/workflows/typescript-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'typescript_sdk/**'
+      - '.github/workflows/typescript-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./typescript_sdk
+
+    strategy:
+      matrix:
+        node-version: [18, 20, 21]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: typescript_sdk/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build package
+        run: npm run build
+
+      - name: Test package install
+        run: |
+          cd ../
+          npm pack typescript_sdk/
+          npm install rileyseaburg-tiktok-business-api-sdk-*.tgz
+
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./typescript_sdk
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript_sdk/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run test coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: typescript_sdk/coverage/lcov.info
+          flags: typescript_sdk
+          name: typescript-sdk-coverage
