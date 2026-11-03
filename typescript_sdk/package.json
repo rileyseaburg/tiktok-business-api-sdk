@@ -45,7 +45,7 @@
     "@orpc/server": "^1.8.9",
     "@orpc/zod": "^1.8.9",
     "fetch-retry": "^6.0.0",
-    "zod": "4.1.9"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@orpc/openapi": "^1.8.9",
